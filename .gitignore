@@ -1,2 +1,5 @@
 **/classes
 **/target
+/ws.edn
+/.nrepl-port
+/.cpcache/

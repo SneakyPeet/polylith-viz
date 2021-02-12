@@ -8,7 +8,9 @@
             :project-to-alias {"development" "dev"}
             :ns-to-lib {}}
 
- :aliases  {:dev {:extra-paths ["development/src"]
+ :aliases  {:dev {:extra-paths ["development/src"
+                                "components/vis-network/src"
+                                "components/workspace/src"]
                   :extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}
                                org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}}}
 
