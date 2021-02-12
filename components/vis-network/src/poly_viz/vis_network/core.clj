@@ -44,8 +44,8 @@
 
 (def level-defaults
   {:project 0
-   :base 0
-   :component 2})
+   :base 1
+   :component 3})
 
 
 (defn ws->network
