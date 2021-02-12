@@ -10,9 +10,13 @@
 
  :aliases  {:dev {:extra-paths ["development/src"
                                 "components/vis-network/src"
-                                "components/workspace/src"]
+                                "components/workspace/src"
+                                "components/html/src"]
                   :extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}
-                               org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}}}
+                               org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
+                               cheshire {:mvn/version "5.10.0"}
+                               hiccup {:mvn/version "1.0.5"}
+                               }}
 
             :test {:extra-paths []}
 

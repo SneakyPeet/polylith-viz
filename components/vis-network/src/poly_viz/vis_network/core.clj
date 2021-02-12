@@ -1,29 +1,30 @@
 (ns poly-viz.vis-network.core)
 
 
-(defn- ->node [style levels {:keys [name type]}]
+(defn- ->node [style levels edge-levels {:keys [name type]}]
   (let [type (keyword type)]
-    {:name name
+    {:label name
      :id name
      :color (get-in style [type :color])
-     :level (get levels type)
+     :level (+ (get levels type 0) (get edge-levels name 0))
      }))
 
 
 (defn- ws->nodes
-  [style levels {:keys [projects bases components]}]
+  [style levels edge-levels {:keys [projects bases components]}]
   (->>
    [components
     bases
     projects]
    (reduce into)
-   (map (partial ->node style levels))))
+   (map (partial ->node style levels edge-levels))))
 
 
 (defn- brick->edge [deps-key brick]
   (let [from (:name brick)
         tos (get brick deps-key [])]
     (map #(hash-map :from from :to (str %)) tos)))
+
 
 (defn- ws->edges
   [{:keys [projects bases components]}]
@@ -36,15 +37,15 @@
 
 
 (def style-defaults
-  {:project {:color "blue"}
-   :component {:color "yellow"}
-   :base {:color "green"}})
+  {:project {:color "#ED553B"}
+   :base {:color "#F6D55C"}
+   :component {:color "#3CAEA3"}})
 
 
 (def level-defaults
-  {:project 1
-   :base 2
-   :component 3})
+  {:project 0
+   :base 0
+   :component 2})
 
 
 (defn ws->network
@@ -56,9 +57,15 @@
             levels level-defaults}}]
   (let [ws (update ws :projects (fn [projects]
                                   (cond->> projects
-                                    (false? include-dev?) (filter #(false? (:is-dev %))))))]
-    {:nodes (ws->nodes style levels ws)
-     :edges (ws->edges ws)}))
+                                    (false? include-dev?) (filter #(false? (:is-dev %))))))
+
+        edges (ws->edges ws)
+        edge-levels (->> edges
+                         (map :to)
+                         (frequencies))]
+    {:nodes (ws->nodes style levels edge-levels ws)
+     :edges edges}
+    ))
 
 
 (comment
