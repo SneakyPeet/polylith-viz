@@ -5,7 +5,8 @@
             :compact-views #{}
             :release-tag-pattern "v[0-9]*"
             :stable-tag-pattern "stable-*"
-            :project-to-alias {"development" "dev"}
+            :project-to-alias {"development" "dev"
+                               "polylith-viz" "pviz"}
             :ns-to-lib {}}
 
  :aliases  {:dev {:extra-paths ["development/src"
