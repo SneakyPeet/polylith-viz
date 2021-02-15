@@ -8,7 +8,7 @@
             [clojure.java.browse :as browser]))
 
 
-(def ^:private js "
+(def ^:private tab-js "
 function page(name) {
   document.getElementsByClassName('is-active')[0].className = '';
   document.getElementById('tab-' + name).className = 'is-active';
@@ -50,7 +50,7 @@ function page(name) {
                       {:id name
                        :class (when-not (zero? i) "is-hidden")}
                       component])))]]
-           [:script js]])})
+           [:script tab-js]])})
 
 
 (defn- network [{:keys [include-dev-projects?
@@ -79,7 +79,7 @@ function page(name) {
           {:name "Explore"
            :component (docs/documentation-component ws)}
           {:name "Search"
-           :component (search/search-component (search/ws->search ws))}]))
+           :component (search/search-component ws)}]))
       (catch Exception e
         {:status 500
          :headers {"content-type" "text/plain"}

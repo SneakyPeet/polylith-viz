@@ -3,8 +3,5 @@
             [poly-viz.search.hiccup :as h]))
 
 
-(defn ws->search [ws] (c/ws->search ws))
-
-
-(defn search-component [search]
-  (h/search-component search))
+(defn search-component [ws]
+  (h/search-component (c/ws->search ws)))
