@@ -2,6 +2,7 @@
   (:require [poly-viz.workspace.interface :as f]
             [poly-viz.vis-network.interface :as vis]
             [poly-viz.documentation.interface :as docs]
+            [poly-viz.search.interface :as search]
             [aleph.http :as http]
             [hiccup.page :as hp]
             [clojure.java.browse :as browser]))
@@ -67,9 +68,6 @@ function page(name) {
      component]))
 
 
-(defn- documents [ws]
-  (docs/documentation-component (docs/ws->docs ws)))
-
 
 (defn- handler [{:keys [ws-path] :as opts}]
   (fn [req]
@@ -78,11 +76,10 @@ function page(name) {
         (->html
          [{:name "Deps"
            :component (network opts ws)}
-          {:name "Docs"
-           :component (documents ws)}]
-       #_  [:div
-       #_   [:details [:summary "Docs"] (documents ws)]
-          [:details [:summary "Network"] (network opts ws)]]))
+          {:name "Explore"
+           :component (docs/documentation-component ws)}
+          {:name "Search"
+           :component (search/search-component (search/ws->search ws))}]))
       (catch Exception e
         {:status 500
          :headers {"content-type" "text/plain"}

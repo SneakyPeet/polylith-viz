@@ -1,6 +1,7 @@
 {:paths ["../../components/vis-network/src"
          "../../components/workspace/src"
          "../../components/documentation/src"
+         "../../components/search/src"
          "../../bases/server/src"]
 
  :deps {cheshire {:mvn/version "5.10.0"}

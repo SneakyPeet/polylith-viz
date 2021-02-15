@@ -1,48 +1,42 @@
 (ns poly-viz.documentation.hiccup
-  (:require [cheshire.core :as json]))
+  (:require [cheshire.core :as json]
+            [clojure.string :as string]
+            [clojure.pprint :as pprint]))
 
 
-(def ^:private elasticlunr-js "http://elasticlunr.com/elasticlunr.min.js")
-
-(defn- flatten-docs [docs]
-  (->> docs
-       (map :definitions)
-       (reduce into)
-       (map #(assoc % :id (str (:interface %) (:name %) (:type %))))
-       (sort-by (juxt :interface :name))))
+(defn- definition-type [t]
+  (let [c
+        (get {"data" "is-warning"
+              "function" "is-info"
+              "macro" "is-danger"} t "")]
+    [:span.tag.is-normal.is-light.mb-0 {:class c} t]))
 
 
-(def ^:private js "
-var elIndex = elasticlunr(function () {
-    this.addField('interface');
-    this.addField('type');
-    this.addField('name');
-    this.setRef('id');
-});
-
-DOC_DATA.forEach(d => elIndex.addDoc(d));
-
-function search(i) {
-  return elIndex.search(i).map(x => x.doc);
-}
-
-
-")
-
-
-(defn documentation-component [docs]
-  (let [data-json (json/generate-string (flatten-docs docs) {:escape-non-ascii true})]
-    [:div
-     [:div#docs
-      "TODO"]
-     [:script {:type "text/javascript" :src elasticlunr-js}]
-     [:script
-      "var DOC_DATA = " data-json  ";"
-      js
-      ]]))
-
-
-#_{:name "article",
-   :type "function",
-   :parameters [{:name "auth-user"} {:name "slug"}],
-   :interface "article"}
+(defn documentation-component [{:keys [interfaces] :as ws}]
+  [:div.columns
+   [:div.column.is-narrow
+    [:aside.menu
+     [:p.menu-label "Interfaces"]
+     [:ul.menu-list
+      (->> interfaces
+           (map
+            (fn [{:keys [name]}]
+              [:li [:a {:href (str "#" name)} name]])))]]]
+   [:div.column {:style "max-height: 90vh"}
+    (->> interfaces
+         (map
+          (fn [{:keys [name definitions implementing-components]}]
+            [:div
+             [:h1.title {:id name} name]
+             [:hr]
+             [:div.mb-6
+              (->> definitions
+                   (map (fn [{:keys [type name] :as d}]
+                          (let [data (dissoc d :name :type)]
+                            [:div.block
+                             [:div.tags.has-addons.mb-0
+                              [:span.tag.has-text-weight-bold.mb-0 name " "]
+                              (definition-type type)]
+                             (when-not (empty? data)
+                               [:pre.p-1.pl-4 (with-out-str
+                                                (pprint/pprint data))])]))))]])))]])
