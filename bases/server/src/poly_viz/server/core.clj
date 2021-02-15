@@ -1,6 +1,7 @@
 (ns poly-viz.server.core
   (:require [poly-viz.workspace.interface :as f]
             [poly-viz.vis-network.interface :as vis]
+            [poly-viz.documentation.interface :as docs]
             [aleph.http :as http]
             [hiccup.page :as hp]
             [clojure.java.browse :as browser]))
@@ -30,11 +31,18 @@
      component]))
 
 
+(defn- documents [ws]
+  (docs/documentation-component (docs/ws->docs ws)))
+
+
 (defn- handler [{:keys [ws-path] :as opts}]
   (fn [req]
     (try
       (let [ws (f/from-path ws-path)]
-        (->html (network opts ws)))
+        (->html
+         [:div
+          (documents ws)
+          (network opts ws)]))
       (catch Exception e
         {:status 500
          :headers {"content-type" "text/plain"}
