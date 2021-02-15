@@ -7,13 +7,49 @@
             [clojure.java.browse :as browser]))
 
 
-(defn ->html [component]
+(def ^:private js "
+function page(name) {
+  document.getElementsByClassName('is-active')[0].className = '';
+  document.getElementById('tab-' + name).className = 'is-active';
+  var content = document.getElementsByClassName('tab-content');
+  for(let i = 0; i < content.length; i++) {
+    content[i].className = 'tab-content is-hidden';
+  }
+  document.getElementById(name).className = 'tab-content';
+}
+")
+
+(defn ->html [tabs]
   {:status 200
    :headers {"content-type" "text/html"}
    :body (hp/html5
-          [:head]
+          [:head
+           [:meta {:charset "utf-8"}]
+           [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+           [:link {:rel "stylesheet"
+                   :href "https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"}]]
           [:body
-           component])})
+           [:section.section
+            [:div.container
+             [:div.tabs
+              [:ul
+               (->> tabs
+                    (map-indexed
+                     (fn [i {:keys [name]}]
+                       (let [id (str "tab-" name)]
+                         [:li {:class (when (zero? i) "is-active")
+                               :id id}
+                          [:a
+                           {:onclick (str "page('" name "')" )}
+                           name]]))))]]
+             (->> tabs
+                  (map-indexed
+                   (fn [i {:keys [name component]}]
+                     [:div.tab-content
+                      {:id name
+                       :class (when-not (zero? i) "is-hidden")}
+                      component])))]]
+           [:script js]])})
 
 
 (defn- network [{:keys [include-dev-projects?
@@ -27,7 +63,7 @@
         component (vis/network-vis-component network :vis-options vis-options)]
     [:div
      [:style
-      "#network {height: 100vh}"]
+      "#network {height: 90vh}"]
      component]))
 
 
@@ -40,8 +76,12 @@
     (try
       (let [ws (f/from-path ws-path)]
         (->html
-         [:div
-          [:details [:summary "Docs"] (documents ws)]
+         [{:name "Deps"
+           :component (network opts ws)}
+          {:name "Docs"
+           :component (documents ws)}]
+       #_  [:div
+       #_   [:details [:summary "Docs"] (documents ws)]
           [:details [:summary "Network"] (network opts ws)]]))
       (catch Exception e
         {:status 500

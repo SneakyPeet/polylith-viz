@@ -26,9 +26,6 @@ function search(i) {
   return elIndex.search(i).map(x => x.doc);
 }
 
-function docToElm
-
-console.log(search('comment')[0].toString());
 
 ")
 
@@ -36,7 +33,8 @@ console.log(search('comment')[0].toString());
 (defn documentation-component [docs]
   (let [data-json (json/generate-string (flatten-docs docs) {:escape-non-ascii true})]
     [:div
-     [:div#docs]
+     [:div#docs
+      "TODO"]
      [:script {:type "text/javascript" :src elasticlunr-js}]
      [:script
       "var DOC_DATA = " data-json  ";"
