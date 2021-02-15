@@ -41,8 +41,8 @@
       (let [ws (f/from-path ws-path)]
         (->html
          [:div
-          (documents ws)
-          (network opts ws)]))
+          [:details [:summary "Docs"] (documents ws)]
+          [:details [:summary "Network"] (network opts ws)]]))
       (catch Exception e
         {:status 500
          :headers {"content-type" "text/plain"}
