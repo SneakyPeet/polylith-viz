@@ -1,6 +1,10 @@
 # polylith-viz
 
-polylith-viz is a tool that you can drop into your polylith application to provide extra documentation about your polylith application.
+polylith-viz is a tool that you can drop into your polylith application to provide 
+
+* Component dependency visualisation
+* Interface exploration
+* Interface full text search 
 
 You can find out more about <img src="logo.png" width="15%" alt="Polylith" id="logo"> [here](https://polylith.gitbook.io/polylith)
 
@@ -68,6 +72,9 @@ The network layout and style can be modified by passing in the different options
 ```
 
 <img src="network-2.png" width="50%" alt="Polylith" id="logo">
+
+## Interface Search and Explore
+polylith-viz makes it easy to explore interfaces as well as allows full text search on interfaces
 
 ## Available Options
 
