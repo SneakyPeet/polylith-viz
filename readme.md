@@ -1,13 +1,82 @@
-<img src="logo.png" width="30%" alt="Polylith" id="logo">
+# polylith-viz
 
-The Polylith documentation can be found here:
+polylith-viz is a tool that you can drop into your polylith application to provide extra documentation about your polylith application.
 
-- The [high-level documentation](https://polylith.gitbook.io/polylith)
-- The [Polylith Tool documentation](https://github.com/polyfy/polylith)
-- The [RealWorld example app documentation](https://github.com/furkan3ayraktar/clojure-polylith-realworld-example-app)
+You can find out more about <img src="logo.png" width="15%" alt="Polylith" id="logo"> [here](https://polylith.gitbook.io/polylith)
 
-You can also get in touch with the Polylith Team via our [forum](https://polylith.freeflarum.com) or on [Slack](https://clojurians.slack.com/archives/C013B7MQHJQ).
+## Usage
 
-<h1>poly-viz</h1>
+1.Add the polylith-viz dependecy to your development deps.edn and start your repl
 
-<p>Add your workspace documentation here...</p>
+```clojure
+ :aliases
+  {:dev
+   {:extra-deps
+    {sneakypeet/polylith-viz
+     {:git/url   "https://github.com/SneakyPeet/polylith-viz"
+      :sha       "INSERT_LATEST_SHA_HERE"
+      :deps/root "projects/polylith-viz"}}}}
+```
+
+2.Generate the polylith workspace file
+
+```
+$ poly ws out:ws.edn
+```
+
+3.Start the polylith server
+
+```clojure
+(poly-viz.server.core/start)
+
+```
+
+You can pass in various options when starting the server (see [available options](#available-options))
+
+```clojure
+(poly-viz.server.core/start
+ :ws-path "/path/to/workspace.edn"
+ :port 3000)
+```
+
+## Dependency network
+
+polylith-viz uses [visjs.org's](https://visjs.org/) network library to generate a dependency network diagram for projects, bases and components.
+
+<img src="network.png" width="50%" alt="Polylith" id="logo">
+
+The network layout and style can be modified by passing in the different options when starting the server.
+
+
+```clojure
+(start
+ :brick-options {:component {:nodes {:color "#ED553B"}
+                             :edges {}}
+                 :base {:nodes {:color "#F6D55C"
+                                :shape "box"}
+                        :edges {}}
+                 :project {:nodes {:color "#3CAEA3"
+                                   :shape "star"}
+                           :edges {}}}
+
+ :vis-options {:layout {:hierarchical {:enabled false}}
+               :edges {:arrows nil
+                       :smooth true}
+
+               :nodes {:shape "ellipse"
+                       :margin {:top 10 :bottom 10 :left 20 :right 20}}})
+```
+
+<img src="network-2.png" width="50%" alt="Polylith" id="logo">
+
+## Available Options
+
+|  Option |  Description | Default|
+|---|---|---|
+|:ws-path  | The path to your generated workspace.edn file| "ws.edn"|
+|:port | Server port | 8087 |
+|:browse? | Opens the browser on start| true|
+|:include-dev-project? | Includes the dev project in analysis | false |
+|:brick-options | [visjs.org](https://visjs.org/) network options for [brick nodes](https://visjs.github.io/vis-network/docs/network/nodes.html) and [edges](https://visjs.github.io/vis-network/docs/network/edges.html)| poly-viz.vis-network.interface/default-brick-vis-options|
+|:brick-levels | When using the [visjs.org](https://visjs.org/) network hierarchical layout, a bricks level is determined by this starting-level + number of other bricks depending on it.| poly-viz.vis-network.interface/brick-hierarchical-layout-starting-levels|
+|:vis-options | [visjs.org](https://visjs.org/) network options| poly-viz.vis-network.interface/default-vis-options|
