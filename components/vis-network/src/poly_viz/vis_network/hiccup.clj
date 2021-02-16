@@ -7,6 +7,7 @@
   (let [data-json (json/generate-string network {:escape-non-ascii true})
         options-json (json/generate-string vis-opts {:escape-non-ascii true})]
     [:div
+     [:style "#network {height: 85vh}"]
      [:div#network]
      [:script {:type "text/javascript" :src vis-js}]
      [:script {:type "text/javascript"}

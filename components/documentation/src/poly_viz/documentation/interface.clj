@@ -2,5 +2,5 @@
   (:require [poly-viz.documentation.hiccup :as h]))
 
 
-(defn documentation-component [ws]
-  (h/documentation-component ws))
+(defn documentation-component [enriched-ws]
+  (h/documentation-component enriched-ws))

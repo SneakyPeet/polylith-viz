@@ -6,3 +6,8 @@
   "Returns the polylith workspace hashmap read from the provided path"
   [path]
   (c/from-path path))
+
+
+(defn enrich
+  [ws]
+  (c/enrich ws))

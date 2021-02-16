@@ -1,85 +1,16 @@
 (ns poly-viz.server.core
-  (:require [poly-viz.workspace.interface :as f]
-            [poly-viz.vis-network.interface :as vis]
-            [poly-viz.documentation.interface :as docs]
-            [poly-viz.search.interface :as search]
-            [aleph.http :as http]
-            [hiccup.page :as hp]
-            [clojure.java.browse :as browser]))
+  (:require [aleph.http :as http]
+            [clojure.java.browse :as browser]
+            [poly-viz.server.tabs :as tabs]
+            [poly-viz.vis-network.interface :as vis]))
 
 
-(def ^:private tab-js "
-function page(name) {
-  document.getElementsByClassName('is-active')[0].className = '';
-  document.getElementById('tab-' + name).className = 'is-active';
-  var content = document.getElementsByClassName('tab-content');
-  for(let i = 0; i < content.length; i++) {
-    content[i].className = 'tab-content is-hidden';
-  }
-  document.getElementById(name).className = 'tab-content';
-}
-")
-
-(defn ->html [tabs]
-  {:status 200
-   :headers {"content-type" "text/html"}
-   :body (hp/html5
-          [:head
-           [:meta {:charset "utf-8"}]
-           [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-           [:link {:rel "stylesheet"
-                   :href "https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"}]]
-          [:body
-           [:section.section
-            [:div.container
-             [:div.tabs
-              [:ul
-               (->> tabs
-                    (map-indexed
-                     (fn [i {:keys [name]}]
-                       (let [id (str "tab-" name)]
-                         [:li {:class (when (zero? i) "is-active")
-                               :id id}
-                          [:a
-                           {:onclick (str "page('" name "')" )}
-                           name]]))))]]
-             (->> tabs
-                  (map-indexed
-                   (fn [i {:keys [name component]}]
-                     [:div.tab-content
-                      {:id name
-                       :class (when-not (zero? i) "is-hidden")}
-                      component])))]]
-           [:script tab-js]])})
-
-
-(defn- network [{:keys [include-dev-projects?
-                        brick-options
-                        brick-levels
-                        vis-options]} ws]
-  (let [network (vis/ws->network ws
-                                 :include-dev-projects? include-dev-projects?
-                                 :brick-options brick-options
-                                 :brick-levels brick-levels)
-        component (vis/network-vis-component network :vis-options vis-options)]
-    [:div
-     [:style
-      "#network {height: 90vh}"]
-     component]))
-
-
-
-(defn- handler [{:keys [ws-path] :as opts}]
+(defn- handler [opts]
   (fn [req]
     (try
-      (let [ws (f/from-path ws-path)]
-        (->html
-         [{:name "Deps"
-           :component (network opts ws)}
-          {:name "Explore"
-           :component (docs/documentation-component ws)}
-          {:name "Search"
-           :component (search/search-component ws)}]))
+      {:status 200
+       :headers {"content-type" "text/html"}
+       :body (tabs/tabs opts)}
       (catch Exception e
         {:status 500
          :headers {"content-type" "text/plain"}
