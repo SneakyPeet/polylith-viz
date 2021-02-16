@@ -76,6 +76,8 @@ The network layout and style can be modified by passing in the different options
 ## Interface Search and Explore
 polylith-viz makes it easy to explore interfaces as well as allows full text search on interfaces
 
+<img src="search.png" width="50%" alt="Polylith" id="logo">
+
 ## Available Options
 
 |  Option |  Description | Default|
