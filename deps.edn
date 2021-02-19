@@ -14,6 +14,7 @@
                                 "components/workspace/src"
                                 "components/documentation/src"
                                 "components/search/src"
+                                "components/example/src"
                                 "bases/server/src"]
                   :extra-deps {org.clojure/clojure {:mvn/version "1.10.1"}
                                org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
