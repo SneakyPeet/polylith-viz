@@ -63,14 +63,14 @@
         (assoc :display-component
                [:div.block
                 [:div.tags.has-addons.mb-0
-                 [:span.tag.has-text-weight-bold.mb-0  (str (:name doc))]
-                 [:div.tag.mb-0.is-info.is-light "ns"]
+                 [:span.tag.has-text-weight-bold.mb-0.is-info.is-light  (str (:name doc))]
+                 [:div.tag.mb-0.is-warning.is-light "ns"]
                  (depricated-tag doc)]
                 (when-let [doc-str (:doc doc)]
-                  [:p.notification.mb-0.p-1.pl-2.is-size-7
+                  [:pre.notification.mb-0.p-0.pl-2.is-size-7
                    doc-str])
                 (when-not (empty? interface-data)
-                  [:pre.p-1.pl-2.is-size-7
+                  [:pre.p-0.pl-2.is-size-7
                    (with-out-str
                      (pprint/pprint interface-data))])])
         (update :publics
@@ -82,7 +82,7 @@
                             (assoc definition
                                    :interface (:name interface)
                                    :display-component
-                                   [:div.block
+                                   [:div.block.pl-5
                                     [:div.tags.has-addons.mb-0
                                      [:span.tag.has-text-weight-bold.mb-0 (str (:name definition))]
                                      [:span.tag.is-warning.is-light.mb-0
