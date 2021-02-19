@@ -64,9 +64,10 @@ function page(name) {
 (defn tabs [{:keys [ws-path] :as opts}]
   (let [ws (f/enrich (f/from-path ws-path))]
     (->html
-     [{:name "Explore"
+     [{:name "Deps"
+       :component (network opts ws)}
+      {:name "Explore"
        :component (docs/documentation-component ws)}
       {:name "Search"
        :component (search/search-component ws)}
-      {:name "Deps"
-       :component (network opts ws)}])))
+      ])))

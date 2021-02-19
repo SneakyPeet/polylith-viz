@@ -41,9 +41,9 @@
                                    :component-path component-path)))))))))
 
 
-(defn- definition-type [{:keys [type arglist]}]
+(defn- definition-type [{:keys [type arglists]}]
   (cond
-    (and (= :var type) arglist) "function"
+    (and (= :var type) arglists) "func"
     (= :var type) "data"
     :else (name type))
   )
@@ -78,15 +78,17 @@
                   (->> pubs
                        (map
                         (fn [definition]
-                          (let [def-data (dissoc definition :name :file :arglists :line :doc :type :deprecated :doc/format)]
+                          (let [def-data (dissoc definition :name :file :arglists :line :doc :type :deprecated :doc/format)
+                                t (definition-type definition) ]
                             (assoc definition
                                    :interface (:name interface)
+                                   :type t
                                    :display-component
                                    [:div.block.pl-5
                                     [:div.tags.has-addons.mb-0
                                      [:span.tag.has-text-weight-bold.mb-0 (str (:name definition))]
                                      [:span.tag.is-warning.is-light.mb-0
-                                      (definition-type definition)]
+                                      t]
                                      (depricated-tag definition)
                                      [:span.tag.is-info.is-light.mb-0 (:name interface)]
                                      #_ [:span (:file definition)]]
@@ -117,62 +119,10 @@
                                               (remove nil?)
                                               (map #(enrich-doc i %)))))))))))
 
-
-
-
-
-"NOTES
-
-:top level -> name doc publics
-
-:var = fn or data
-
-always avail
-:name <symbol>
-:file <can we open a file at a line?>
-:line int
-:type <show if this is not :var>
-
-sometimes availalbe
-:doc
-:argslist <list of vecs of symbols>
-
-
-:types
-  :var :multimethod :macro
-   :protocol -> has :members which follow the above
-
-"
-
-
-(defn- enrich-definition [interface definition]
-  (let [data (dissoc definition :name :type)]
-    (assoc definition
-           :interface (:name interface)
-           :display-component
-           [:div.block
-            [:div.tags.has-addons.mb-0
-             [:span.tag.has-text-weight-bold.mb-0 (:name definition)]
-             [:span.tag.is-primary.is-light.mb-0 (:name interface)]
-             (definition-type-class (:type definition))]
-            (when-not (empty? data)
-              [:pre.p-1.pl-4 (with-out-str
-                               (pprint/pprint data))])])))
-
-
-(defn- enrich-definitions [ws]
-  (update ws :interfaces
-          (fn [is]
-            (map (fn [i]
-                   (update i :definitions
-                           #(map (partial enrich-definition i) %))) is))))
-
-
 (defn enrich [ws]
   (-> ws
       enrich-interface-namespaces
-      enrich-interface-docs
-      enrich-definitions))
+      enrich-interface-docs))
 
 
 

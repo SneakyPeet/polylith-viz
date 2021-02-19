@@ -8,13 +8,14 @@
 (defn- prep-definition [definition]
   (-> definition
       (assoc :id (str (:interface definition) (:name definition) (:type definition)))
+      (update :doc #(or % ""))
       (update :display-component #(hiccup/html %))))
 
 
-(defn- flatten-definitions [enriched-ws]
+(defn- flatten-docs [enriched-ws]
   (->> (:interfaces enriched-ws)
-       (map :definitions)
-       (reduce into)
+       (mapcat :docs)
+       (mapcat :publics)
        (map prep-definition)
        (sort-by (juxt :interface :name))))
 
@@ -24,6 +25,7 @@ var elIndex = elasticlunr(function () {
     this.addField('interface');
     this.addField('type');
     this.addField('name');
+    this.addField('doc');
     this.setRef('id');
 });
 
@@ -35,9 +37,10 @@ function handleSearch(e) {
   var results = elIndex.search(value,{
     fields: {
         name: {
-            boost: 3,
+            boost: 100,
             expand: true
         },
+        doc: {boost: 3},
         interface: {boost: 2},
         type: {boost: 1}
     },
@@ -67,7 +70,7 @@ document.getElementById('search-form').addEventListener('submit', handleSearch)
 
 
 (defn search-component [enriched-ws]
-  (let [data-json (json/generate-string (flatten-definitions enriched-ws) {:escape-non-ascii true})]
+  (let [data-json (json/generate-string (flatten-docs enriched-ws) {:escape-non-ascii true})]
     [:div
      search-box
      [:div#search-results]
