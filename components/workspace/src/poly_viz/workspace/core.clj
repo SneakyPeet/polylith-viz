@@ -24,7 +24,7 @@
               (->> interfaces
                    (map (fn [{:keys [name definitions] :as i}]
                           (let [component-ns-str (str top-namespace "." name)
-                                component-path (str "components/" (ns-str->path name) "/src")
+                                component-path (str "components/" (string/replace name #"\." "/") "/src")
                                 interface-ns-str (str component-ns-str "." interface-ns)
                                 interface-ns (symbol interface-ns-str)
                                 definitions (->> definitions
@@ -131,4 +131,6 @@
   (enrich (from-path "ws.edn"))
 
   (spit "docs-example.edn" (with-out-str (clojure.pprint/pprint (codox/read-namespaces ["components/example/src/poly_viz/example"]))))
+
+  (codox/read-namespaces ["components/vis-network/src"])
 )
