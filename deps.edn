@@ -19,7 +19,8 @@
                                org.clojure/tools.deps.alpha {:mvn/version "0.8.695"}
                                cheshire {:mvn/version "5.10.0"}
                                hiccup {:mvn/version "1.0.5"}
-                               aleph  {:mvn/version "0.4.6"}}}
+                               aleph  {:mvn/version "0.4.6"}
+                               codox/codox {:mvn/version "0.10.7"}}}
 
             :test {:extra-paths []}
 

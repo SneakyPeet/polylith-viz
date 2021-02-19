@@ -17,9 +17,13 @@
    [:div.column.is-three-quarters {:style column-style}
     (->> interfaces
          (map
-          (fn [{:keys [name definitions implementing-components]}]
+          (fn [{:keys [name docs] :as i}]
             [:div
              [:h1.title {:id name} name]
              [:hr]
-             [:div.mb-6
-              (map :display-component definitions)]])))]])
+             (->> docs
+                  (map
+                   (fn [doc]
+                     [:div.mb-6
+                      (:display-component doc)
+                      (map :display-component (:publics doc))])))])))]])
