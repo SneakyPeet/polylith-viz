@@ -11,3 +11,7 @@
 (defn enrich
   [ws]
   (c/enrich ws))
+
+
+(defn poly-shell! [& args]
+  (c/poly-shell! args))

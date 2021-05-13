@@ -1,10 +1,10 @@
 # polylith-viz
 
-polylith-viz is a tool that you can drop into your polylith application to provide 
+polylith-viz is a tool that you can drop into your polylith application to provide
 
 * Component dependency visualisation
 * Interface exploration
-* Interface full text search 
+* Interface full text search
 
 You can find out more about <img src="logo.png" width="15%" alt="Polylith" id="logo"> [here](https://polylith.gitbook.io/polylith)
 
@@ -22,11 +22,9 @@ You can find out more about <img src="logo.png" width="15%" alt="Polylith" id="l
       :deps/root "projects/polylith-viz"}}}}
 ```
 
-2.Generate the polylith workspace file
+2. Ensure poly tool is installed
 
-```
-$ poly ws out:ws.edn
-```
+polylith-viz will automatically regenerate the workspace.edn file on every request. This can be turned off with options.
 
 3.Start the polylith server
 
@@ -82,7 +80,9 @@ polylith-viz makes it easy to explore interfaces as well as allows full text sea
 
 |  Option |  Description | Default|
 |---|---|---|
-|:ws-path  | The path to your generated workspace.edn file| "ws.edn"|
+|:ws-path  | The path to your generated workspace.edn file| "polyws.edn"|
+|:output-ws-on-request? | Rebuilds the workspace file on every page refresh | true |
+|:ws-shell-cmd | The poly tool command that rebuilds the workspace file when :output-ws-on-request? is true | ["poly" "ws" "out:polyws.edn"] |
 |:port | Server port | 8087 |
 |:browse? | Opens the browser on start| true|
 |:include-dev-project? | Includes the dev project in analysis | false |

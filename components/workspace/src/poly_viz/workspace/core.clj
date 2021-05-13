@@ -1,5 +1,6 @@
 (ns poly-viz.workspace.core
   (:require [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             [clojure.pprint :as pprint]
             [codox.reader.clojure :as codox]
             [clojure.string :as string]))
@@ -7,6 +8,12 @@
 
 (defn from-path [path]
   (read-string (slurp path)))
+
+
+(defn poly-shell! [args]
+  (prn (str "polytool: "
+            (:out
+             (apply shell/sh args)))))
 
 
 (defn- ns-str->path
