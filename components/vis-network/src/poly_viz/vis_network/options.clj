@@ -2,9 +2,13 @@
 
 
 (def default-vis-options
-  {:layout {:hierarchical {:enabled true
-                           :levelSeparation 50
-                           :nodeSpacing 250}}
+  {:layout {:hierarchical {:enabled          true
+                           :direction        "UD"
+                           :sortMethod       "directed"
+                           :shakeTowards     "leaves"
+                           :edgeMinimization true
+                           :levelSeparation  75
+                           :nodeSpacing      250}}
    :edges {:arrows {:to {:enabled true
                          :type "arrow"
                          :scaleFactor 0.8}}
@@ -27,4 +31,4 @@
 (def brick-hierarchical-layout-starting-levels
   {:project 0
    :base 1
-   :component 3})
+   :component 2})

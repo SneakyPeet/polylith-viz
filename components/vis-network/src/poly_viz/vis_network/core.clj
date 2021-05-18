@@ -5,23 +5,52 @@
   (str (:name brick) "-" (name (:type brick))))
 
 
-(defn- ->node [brick-options brick-levels edge-levels {:keys [name type] :as brick}]
+(defn- calculate-depth [depths deps-lookup component]
+  (let [deps (get deps-lookup component [])]
+    (if (empty? deps)
+      depths
+      (reduce
+        (fn [d i] (calculate-depth (update d i inc) deps-lookup i))
+        depths
+        deps))))
+
+
+(defn- components-depth [components]
+  (let [initial-depth (->> components
+                           (map (juxt :name (constantly 0)))
+                           (into {}))
+
+        deps-lookup (->> components
+                         (map (juxt :name :interface-deps))
+                         (into {}))]
+    (reduce (fn [d i]
+              (calculate-depth d deps-lookup i))
+            initial-depth
+            (keys deps-lookup))))
+
+
+(defn- ->node [brick-options brick-levels component-depth-lookup {:keys [name type] :as brick}]
   (let [type (keyword type)
-        opts (get-in brick-options [type :nodes] {})]
+        opts (get-in brick-options [type :nodes] {})
+        id (brick->id brick)
+        level (if (= :component type)
+                (get component-depth-lookup name 0)
+                0)]
     (assoc opts
            :label name
-           :id (brick->id brick)
-           :level (+ (get brick-levels type 0) (get edge-levels name 0)))))
+           :id id
+           :level (+ (get brick-levels type 0) level))))
 
 
 (defn- ws->nodes
-  [brick-options brick-levels edge-levels {:keys [projects bases components]}]
-  (->>
-   [components
-    bases
-    projects]
-   (reduce into)
-   (map (partial ->node brick-options brick-levels edge-levels))))
+  [brick-options brick-levels {:keys [projects bases components]}]
+  (let [component-depth-lookup (components-depth components)]
+    (->>
+      [components
+       bases
+       projects]
+      (reduce into)
+      (map (partial ->node brick-options brick-levels component-depth-lookup)))))
 
 
 (defn- brick->edges [opts deps-key brick-type brick]
@@ -49,10 +78,7 @@
                                   (cond->> projects
                                     (false? include-dev?) (filter #(false? (:is-dev %))))))
 
-        edges (ws->edges brick-options ws)
-        edge-levels (->> edges
-                         (map :to)
-                         (frequencies))]
-    {:nodes (ws->nodes brick-options brick-levels edge-levels ws)
+        edges (ws->edges brick-options ws)]
+    {:nodes (ws->nodes brick-options brick-levels ws)
      :edges edges}
     ))
