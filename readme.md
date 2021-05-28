@@ -10,6 +10,8 @@ You can find out more about <img src="logo.png" width="15%" alt="Polylith" id="l
 
 ## Usage
 
+### Installation
+
 1.Add the polylith-viz dependecy to your development deps.edn and start your repl
 
 ```clojure
@@ -26,7 +28,11 @@ You can find out more about <img src="logo.png" width="15%" alt="Polylith" id="l
 
 polylith-viz will automatically regenerate the workspace.edn file on every request. This can be turned off with options.
 
-3.Start the polylith server
+### Dev server
+
+Run the poly-viz server from your repl. Any changes to your polylith system will reflect on page refresh
+
+Start the polylith server
 
 ```clojure
 (poly-viz.server.core/start)
@@ -40,6 +46,24 @@ You can pass in various options when starting the server (see [available options
  :ws-path "/path/to/workspace.edn"
  :port 3000)
 ```
+
+
+### Static Site
+
+You can use `poly-viz.server.static/html` to generate a static page. You can setup your CI to build and deploy this anywhere you like for easy reference.
+
+Writing the code that saves the html to a file is left to you, but here is an example
+
+```clojure
+(defn build-pages
+  "assumes you have already ran `poly ws out:polyws.edn`"
+  []
+  (let [f (io/file "public/index.html")]
+    (io/make-parents f)
+    (spit f (static/html :include-dev-projects? true
+                         :rebuild-ws-file-before-generate? false))))
+```
+
 
 ## Dependency network
 

@@ -5,7 +5,8 @@
             [poly-viz.server.tabs :as tabs]
             [poly-viz.vis-network.interface :as vis]
             [poly-viz.workspace.interface :as workspace]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [poly-viz.server.static]))
 
 
 (defn- open-file [req]

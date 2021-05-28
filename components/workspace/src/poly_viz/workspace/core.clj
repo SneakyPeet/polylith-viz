@@ -23,12 +23,13 @@
       (string/replace #"-" "_")))
 
 
-(defn- enrich-interface-namespaces[ws]
+(defn- enrich-interface-namespaces [ws]
   (let [{:keys [interface-ns top-namespace]} (:settings ws)]
     (update ws
             :interfaces
             (fn [interfaces]
               (->> interfaces
+                   (filter #(not (nil? (:name %))))
                    (map (fn [{:keys [name definitions] :as i}]
                           (let [component-ns-str (str top-namespace "." name)
                                 component-path (str "components/" (string/replace name #"\." "/") "/src")
