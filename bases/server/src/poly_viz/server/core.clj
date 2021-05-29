@@ -54,7 +54,8 @@
              brick-options
              brick-levels
              vis-options
-             version]
+             version
+             extra-pages]
       :or {port 8087
            ws-path "polyws.edn"
            output-ws-on-request? true
@@ -64,7 +65,8 @@
            brick-options vis/default-brick-vis-options
            brick-levels vis/brick-hierarchical-layout-starting-levels
            vis-options vis/default-vis-options
-           version ""}}]
+           version ""
+           extra-pages []}}]
   (let [opts {:ws-path ws-path
               :output-ws-on-request? output-ws-on-request?
               :ws-shell-cmd ws-shell-cmd
@@ -72,7 +74,8 @@
               :brick-options brick-options
               :brick-levels brick-levels
               :vis-options vis-options
-              :version version}
+              :version version
+              :extra-pages extra-pages}
         app (handler opts)]
     (stop)
     (reset! *server (http/start-server app {:port port}))

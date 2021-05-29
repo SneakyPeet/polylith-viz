@@ -113,3 +113,5 @@ polylith-viz makes it easy to explore interfaces as well as allows full text sea
 |:brick-options | [visjs.org](https://visjs.org/) network options for [brick nodes](https://visjs.github.io/vis-network/docs/network/nodes.html) and [edges](https://visjs.github.io/vis-network/docs/network/edges.html)| poly-viz.vis-network.interface/default-brick-vis-options|
 |:brick-levels | When using the [visjs.org](https://visjs.org/) network hierarchical layout, a bricks level is determined by this starting-level + number of other bricks depending on it.| poly-viz.vis-network.interface/brick-hierarchical-layout-starting-levels|
 |:vis-options | [visjs.org](https://visjs.org/) network options| poly-viz.vis-network.interface/default-vis-options|
+|:version | Displays the provided string in the menu | "" |
+|:extra-pages | A vector of maps representing any extra pages you want to add. Useful if you want to use polylith-viz as the base project, but add some custom documentation. Maps have the form {:name "" :component [:div]}. :component is a [hiccup](https://github.com/weavejester/hiccup) structure. [Bulma](https://bulma.io/) is used as css framework | [] |
