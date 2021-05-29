@@ -8,8 +8,8 @@
 
 (def ^:private tab-js "
 function page(name) {
-  document.getElementsByClassName('is-active')[0].className = '';
-  document.getElementById('tab-' + name).className = 'is-active';
+  document.getElementsByClassName('is-active')[0].className = 'navbar-item';
+  document.getElementById('tab-' + name).className = 'navbar-item is-active has-text-info';
   var content = document.getElementsByClassName('tab-content');
   for(let i = 0; i < content.length; i++) {
     content[i].className = 'tab-content is-hidden';
@@ -18,7 +18,7 @@ function page(name) {
 }
 ")
 
-(defn ->html [tabs]
+(defn ->html [opts ws tabs]
    (hp/html5
     [:head
      [:meta {:charset "utf-8"}]
@@ -26,26 +26,33 @@ function page(name) {
      [:link {:rel "stylesheet"
              :href "https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"}]]
     [:body
-     [:section.section
-      [:div.container
-       [:div.tabs
-        [:ul
+     [:div.container
+      [:nav.navbar {:role "navigation" :aria-label "main navigation"}
+       [:div.navbar-brand
+        [:span.navbar-item.heading {:style "padding-top: 0.8rem"}
+         [:strong (:name ws)]
+         (when-let [v (:version opts)]
+           [:span "|" v])]]
+       [:div.navbar-menu
+        [:div.navbar-start
          (->> tabs
               (map-indexed
-               (fn [i {:keys [name]}]
-                 (let [id (str "tab-" name)]
-                   [:li {:class (when (zero? i) "is-active")
-                         :id id}
-                    [:a
-                     {:onclick (str "page('" name "')" )}
-                     name]]))))]]
-       (->> tabs
-            (map-indexed
+                (fn [i {:keys [name]}]
+                  (let [id (str "tab-" name)]
+                    [:a.navbar-item
+                     {:class   (when (zero? i) "is-active has-text-info")
+                      :id      id
+                      :onclick (str "page('" name "')" )}
+                     name]))))]]]]
+     [:div.block]
+     [:div.container
+      (->> tabs
+           (map-indexed
              (fn [i {:keys [name component]}]
                [:div.tab-content
-                {:id name
+                {:id    name
                  :class (when-not (zero? i) "is-hidden")}
-                component])))]]
+                component])))]
      [:script tab-js]]))
 
 
@@ -64,10 +71,12 @@ function page(name) {
 (defn tabs [{:keys [ws-path] :as opts}]
   (let [ws (f/enrich (f/from-path ws-path))]
     (->html
-     [{:name "Deps"
-       :component (network opts ws)}
-      {:name "Explore"
-       :component (docs/documentation-component ws)}
-      {:name "Search"
-       :component (search/search-component ws)}
-      ])))
+      opts
+      ws
+      [{:name "Deps"
+        :component (network opts ws)}
+       {:name "Explore"
+        :component (docs/documentation-component ws)}
+       {:name "Search"
+        :component (search/search-component ws)}
+       ])))
