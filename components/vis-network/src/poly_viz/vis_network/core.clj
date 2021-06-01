@@ -5,28 +5,41 @@
   (str (:name brick) "-" (name (:type brick))))
 
 
-(defn- calculate-depth [depths deps-lookup component]
-  (let [deps (get deps-lookup component [])]
-    (if (empty? deps)
-      depths
-      (reduce
-        (fn [d i] (calculate-depth (update d i inc) deps-lookup i))
-        depths
-        deps))))
+(defn- get-reversed-levels [components]
+  (let [component-deps (->> components
+                            (map (juxt :name :interface-deps))
+                            (sort-by #(-> % last count))
+                            vec)]
+    (loop [component-deps component-deps
+           result         {}]
+      (if (empty? component-deps)
+        result
+        (let [head             (first component-deps)
+              [component deps] head
+              tail             (vec (rest component-deps))
+              deps-levels      (map #(get result %) deps)
+              can-calculate?   (empty? (filter nil? deps-levels))]
+          (if-not can-calculate?
+            (recur
+              (conj tail head)
+              result)
+            (let [level (if (empty? deps-levels)
+                          0
+                          (inc (apply max deps-levels)))]
+              (recur
+                tail
+                (assoc result component level)))))))))
 
 
 (defn- components-depth [components]
-  (let [initial-depth (->> components
-                           (map (juxt :name (constantly 0)))
-                           (into {}))
-
-        deps-lookup (->> components
-                         (map (juxt :name :interface-deps))
-                         (into {}))]
-    (reduce (fn [d i]
-              (calculate-depth d deps-lookup i))
-            initial-depth
-            (keys deps-lookup))))
+  (let [reversed-levels (get-reversed-levels components)
+        depth           (if (empty? reversed-levels)
+                0
+                (apply max (vals reversed-levels)))]
+    (->> reversed-levels
+         (map (fn [[k v]]
+                [k (- depth v)]))
+         (into {}))))
 
 
 (defn- ->node [brick-options brick-levels component-depth-lookup {:keys [name type] :as brick}]
@@ -40,7 +53,6 @@
            :label name
            :id id
            :level (+ (get brick-levels type 0) level))))
-
 
 (defn- ws->nodes
   [brick-options brick-levels {:keys [projects bases components]}]
