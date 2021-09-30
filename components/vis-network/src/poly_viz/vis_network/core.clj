@@ -5,9 +5,29 @@
   (str (:name brick) "-" (name (:type brick))))
 
 
+(defn- extract-src-names
+  "this exists for backwards compatibility"
+  [k brick]
+  (let [deps (get brick k)]
+    (cond
+      (map? deps)    (:src deps [])
+      (vector? deps) deps
+      :else          [])))
+
+
+(defn- extract-interface-deps
+  [brick]
+  (extract-src-names :interface-deps brick))
+
+
+(defn- extract-base-names
+  [brick]
+  (extract-src-names :base-names brick))
+
+
 (defn- get-reversed-levels [components]
   (let [component-deps (->> components
-                            (map (juxt :name :interface-deps))
+                            (map (juxt :name extract-interface-deps))
                             (sort-by #(-> % last count))
                             vec)]
     (loop [component-deps component-deps
@@ -65,21 +85,21 @@
       (map (partial ->node brick-options brick-levels component-depth-lookup)))))
 
 
-(defn- brick->edges [opts deps-key brick-type brick]
+(defn- brick->edges [opts deps-extract-fn brick-type brick]
   (let [from (brick->id brick)
-        tos (get brick deps-key [])]
+        tos (or (deps-extract-fn brick) [])]
     (map #(assoc opts :from from :to (str % "-" (name brick-type))) tos)))
 
 
 (defn- ws->edges
   [brick-options {:keys [projects bases components]}]
-  (let [->edges (fn [t k brick-type]
+  (let [->edges (fn [t e-fn brick-type]
                   (fn [brick]
-                    (brick->edges (get-in brick-options [t :edges] {}) k brick-type brick)))]
+                    (brick->edges (get-in brick-options [t :edges] {}) e-fn brick-type brick)))]
     (->>
-     [(map (->edges :component :interface-deps :component) components)
-      (map (->edges :base :interface-deps :component) bases)
-      (map (->edges :project :base-names :base) projects)]
+     [(map (->edges :component extract-interface-deps :component) components)
+      (map (->edges :base extract-interface-deps :component) bases)
+      (map (->edges :project extract-base-names :base) projects)]
      (reduce into)
      (reduce into))))
 
