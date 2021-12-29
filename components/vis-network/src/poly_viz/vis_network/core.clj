@@ -61,6 +61,97 @@
                 [k (- depth v)]))
          (into {}))))
 
+#_(def c (atom nil))
+
+
+(defn dependecy-branches [components]
+  (let [components (->> components
+                        (map (juxt :name extract-interface-deps))
+                        (sort-by #(count (second %)))
+                        vec)]
+    (loop [components components
+           result     {}
+           n          0]
+      (let [component       (first components)
+            [c-name c-deps] component
+            tail            (vec (rest components))]
+
+        (cond
+          (empty? components)
+          (->> result
+               vals
+               (reduce into)
+               set
+               (map reverse)
+               (sort-by (juxt first count)))
+
+          (empty? c-deps)
+          (recur tail (assoc result c-name [[c-name]]) n)
+
+          (>= n 100)
+          (throw (ex-info "Limit" {:n               n
+                                   :result          result
+                                   :remaining-comps components}))
+
+          (empty? (filter #(not (contains? result %)) c-deps))
+          (recur tail (reduce
+                        (fn [r' [k v]]
+                          (update r' k into v))
+                        result
+                        (->> c-deps
+                             (map (fn [dep]
+                                    [c-name (->> (get result dep)
+                                                 (map #(conj % c-name)))]))))
+                 n)
+
+          :else
+          (recur (conj tail component) result (inc n)))))))
+
+(defn components-depth-2 [components]
+  (let [branches (dependecy-branches components)]
+    (->> branches
+         (map #(->>
+                 (interleave % (range (count %)))
+                 (partition 2)))
+         (reduce into)
+         (group-by first)
+         (map (fn [[k v]]
+                [k (->> v
+                        (map last)
+                        (apply max))]))
+         (into {}))))
+
+(defn components-depth-3 [components]
+  (let [branches (dependecy-branches components)
+        lookup   (->> branches
+                    (map #(->>
+                            (interleave % (range (count %)))
+                            (partition 2)))
+                    (reduce into)
+                    (group-by first)
+                    (map (fn [[k v]]
+                           [k (->> v
+                                   (map last)
+                                   (apply max))]))
+                    (into {}))]
+    (->> branches
+         (map (fn [deps]
+                (->> deps
+                     (map (fn [d]
+                            [d (get lookup d)])))))
+         (group-by (comp first first))
+         (map (fn [[c deps]]
+                (let [n  (->> deps
+                             (map (comp second second))
+                             (remove nil?))
+                      n' (get lookup c)]
+                  [c
+                   ;;n'
+                   (if (empty? n)
+                     (get lookup c)
+                     (max n' (dec (apply min n))))])))
+         (into {}))))
+
 
 (defn- ->node [brick-options brick-levels component-depth-lookup {:keys [name type] :as brick}]
   (let [type (keyword type)
@@ -76,7 +167,8 @@
 
 (defn- ws->nodes
   [brick-options brick-levels {:keys [projects bases components]}]
-  (let [component-depth-lookup (components-depth components)]
+  #_(reset! c components)
+  (let [component-depth-lookup (components-depth-3 components)]
     (->>
       [components
        bases
